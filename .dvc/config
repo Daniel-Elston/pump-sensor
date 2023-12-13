@@ -1,0 +1,4 @@
+[core]
+    remote = myremote
+['remote "myremote"']
+    url = s3://delst-bucket/tsA06k6gAvMaezEhypwjZh/gdlGOCzYpsManpD5G
