@@ -1,34 +1,53 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import logging
+import os
 from pathlib import Path
 
-import click
-from dotenv import find_dotenv
-from dotenv import load_dotenv
+import dotenv
+import pandas as pd
+
+# project_dir = str(Path.cwd().parent.parent)
+project_dir = Path(__file__).resolve().parents[2]
+
+dotenv_path = os.path.join(project_dir, '.env')
+dotenv.load_dotenv(dotenv_path)
 
 
-@click.command()
-@click.argument('input_filepath', type=click.Path(exists=True))
-@click.argument('output_filepath', type=click.Path())
-def main(input_filepath, output_filepath):
-    """ Runs data processing scripts to turn raw data from (../raw) into
-        cleaned data ready to be analyzed (saved in ../processed).
-    """
-    logger = logging.getLogger(__name__)
-    logger.info('making final data set from raw data')
+def load_csv(file_path):
+    df = pd.read_csv(file_path)
+    return df
 
 
-if __name__ == '__main__':
-    log_fmt = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-    logging.basicConfig(level=logging.INFO, format=log_fmt)
+def save_as_parq(df, save_path):
+    df.to_parquet(save_path)
 
-    # not used in this stub but often useful for finding various files
-    project_dir = Path(__file__).resolve().parents[2]
 
-    # find .env automagically by walking up directories until it's found, then
-    # load up the .env entries as environment variables
-    load_dotenv(find_dotenv())
+def load_parquet(file_path):
+    df = pd.read_parquet(file_path)
+    return df
 
+
+def main():
+
+    csv_file_path = 'C:/Users/delst/workspace/pump-sensor/data/raw/sensor.csv'
+    parquet_file_path = 'C:/Users/delst/workspace/pump-sensor/data/sdo/sensor.parq'
+
+    # Load data from CSV
+    df = load_csv(csv_file_path)
+    sample = df.iloc[0:10000, :]  # 1 day sample data
+    sample.to_csv(
+        'C:/Users/delst/workspace/pump-sensor/data/sample/sensor_sample.csv')
+
+    # Save as Parquet
+    save_as_parq(df, parquet_file_path)
+
+    # Load from Parquet
+    df_parquet = load_parquet(parquet_file_path)
+
+    # Display the DataFrame
+    print(df_parquet)
+
+
+if __name__ == "__main__":
     main()
