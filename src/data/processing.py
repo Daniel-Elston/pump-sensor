@@ -6,6 +6,7 @@ from pathlib import Path
 
 import dotenv
 import pandas as pd
+import pyarrow.parquet as pq
 import yaml
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
@@ -134,3 +135,42 @@ class AdvancedProcessor:
         Perform advanced processing on the data.
         """
         return self.scale_data()
+
+
+def save_to_parquet(df, file_path):
+    """
+    Save a DataFrame to a Parquet file.
+
+    Args:
+        df (DataFrame): DataFrame to save.
+        file_path (str): Path to the output Parquet file.
+    """
+    df.to_parquet(file_path, engine='pyarrow')
+
+
+def main():
+    config = load_config(config_path)
+    df = pq.read_table(os.path.join(
+        project_dir, 'data/sdo/sensor.parq')).to_pandas()
+
+    # Data selection
+    selector = DataSelect(df, config)
+    df_selected = selector.select_data()
+
+    # Initial Processing
+    initial_processor = InitialProcessor(df_selected)
+    df_processed = initial_processor.process()
+
+    # Advanced Processing
+    advanced_processor = AdvancedProcessor(df_processed, method='standardize')
+    df_final = advanced_processor.process()
+
+    # Save to Parquet
+    output_file_path = os.path.join(
+        project_dir, 'data/processed/processed_sensor.parq')
+    save_to_parquet(df_final, output_file_path)
+    print(f"Data saved: {output_file_path}")
+
+
+if __name__ == "__main__":
+    main()
