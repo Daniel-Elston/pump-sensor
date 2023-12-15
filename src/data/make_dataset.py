@@ -86,8 +86,12 @@ def main(index=None):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description="Process some integers.")
-    parser.add_argument('--index', type=int,
-                        help='Index of the item to retrieve', required=False)
+    parser.add_argument(
+        '--index',
+        type=int,
+        help='Index of the item to retrieve',
+        required=False
+    )
     args = parser.parse_args()
 
     main(index=args.index)
