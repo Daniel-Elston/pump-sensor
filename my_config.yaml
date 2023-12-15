@@ -1,0 +1,15 @@
+cols_to_drop:
+  - sensor_15
+  - sensor_50
+
+sensors_to_use:
+  - sensor_00
+  - sensor_02
+  - sensor_03
+  - sensor_12
+  - sensor_18
+  - sensor_24
+  - sensor_36
+  - sensor_40
+  - sensor_42
+  - sensor_48
