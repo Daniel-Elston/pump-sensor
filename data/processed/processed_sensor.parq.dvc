@@ -1,0 +1,5 @@
+outs:
+- md5: 45fb2b30981600a2ab58a805eb1083a8
+  size: 10343220
+  hash: md5
+  path: processed_sensor.parq
