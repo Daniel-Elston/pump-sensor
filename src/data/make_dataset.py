@@ -1,97 +1,62 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import argparse
 import os
 from pathlib import Path
 
 import dotenv
-import pandas as pd
 import torch
-from torch.utils.data import DataLoader
+import yaml
+from base_processing import BaseDataProcessing
 from torch.utils.data import Dataset
-
-print(torch.__version__)  # PyTorch version = 2.2.0
 
 project_dir = Path(__file__).resolve().parents[2]
 dotenv.load_dotenv(os.path.join(project_dir, '.env'))
 
 
-class SensorDataset(Dataset):
-    def __init__(self, csv_file, transform=None):
+def load_config(config_path):
+    with open(config_path, 'r') as file:
+        return yaml.safe_load(file)
+
+
+class SensorDataset(Dataset, BaseDataProcessing):
+    def __init__(self, data_path, config, method='normalize'):
         """
         Initialize the dataset object.
-
         Args:
-            csv_file (str): Path to the CSV file.
-            transform (callable, optional): Optional transform to be applied
-                on a sample.
+            data_path (str): Path to the data.
+            config (dict): Configuration parameters.
+            method (str): Method to use for scaling the data.
         """
+        BaseDataProcessing.__init__(self, data_path, config, method=method)
+        self.data = self.process()  # Assuming this returns a DataFrame
+        self.config = config
 
-        # Load the data, transform and select
-        self.sensor_data = pd.read_csv(csv_file)
-
-        # Separate timestamps for display/plotting
-        self.timestamps = self.sensor_data.iloc[:, 1]
-
-        self.transform = transform
-        self.data = self.sensor_data.iloc[:, 2:-1]  # Just sensor data
-
-    def __len__(self):
-        """
-        Return the total number of samples in the dataset. Each sample is a sequence of data points.
-        """
-        return len(self.sensor_data)
-
-    def __getitem__(self, idx):
+    def __getitem__(self, col):
         """
         Retrieve a single sample from the dataset.
-
         Args:
-            idx (int): Index of the sample to retrieve.
-
+            col (int): Column id of the sesnor data to retrieve.
         Returns:
             torch.Tensor: A tensor representing a sequence of sensor readings.
         """
-        if torch.is_tensor(idx):
-            idx = idx.tolist()
+        # Convert row to PyTorch tensor
+        numeric_data = self.data.select_dtypes(include=['number'])
+        return torch.tensor(numeric_data.iloc[:, col].values, dtype=torch.float)
 
-        sequence = self.data.iloc[idx]
-
-        if self.transform:
-            sequence = self.transform(sequence)
-
-        # Convert the sequence to a tensor
-        return torch.tensor(sequence.values, dtype=torch.float32), self.timestamps.iloc[idx]
+    def __len__(self):
+        return len(self.data)
 
 
-def main(index=None):
-    path_to_csv_file = os.path.join(project_dir, 'data/raw/sensor.csv')
-    dataset = SensorDataset(csv_file=path_to_csv_file)
-    dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
+def main():
+    data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
+    config_path = os.path.join(project_dir, 'my_config.yaml')
+    config = load_config(config_path)
 
-    if index is not None:
-        # Retrieve a single item using __getitem__
-        data, timestamp = dataset[index]
-        print(f"Data at index {index}: {data}")
-        print(f"Timestamp: {timestamp}")
-    else:
-        # Default behavior: iterate through the DataLoader
-        for i, (batch, timestamps) in enumerate(dataloader):
-            print(f"Batch {i+1}:")
-            print(batch, timestamps)
-            if i == 2:
-                break
+    dataset = SensorDataset(data_path, config)
+
+    print(dataset[0])
 
 
-if __name__ == "__main__":
-    parser = argparse.ArgumentParser(description="Process some integers.")
-    parser.add_argument(
-        '--index',
-        type=int,
-        help='Index of the item to retrieve',
-        required=False
-    )
-    args = parser.parse_args()
-
-    main(index=args.index)
+if __name__ == '__main__':
+    main()

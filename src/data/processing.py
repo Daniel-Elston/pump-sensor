@@ -151,7 +151,8 @@ def save_to_parquet(df, file_path):
 def main():
     config = load_config(config_path)
     df = pq.read_table(os.path.join(
-        project_dir, 'data/sdo/sensor.parq')).to_pandas()
+        project_dir, 'data/sdo/sensor.parq')
+    ).to_pandas()
 
     # Data selection
     selector = DataSelect(df, config)
@@ -162,7 +163,7 @@ def main():
     df_processed = initial_processor.process()
 
     # Advanced Processing
-    advanced_processor = AdvancedProcessor(df_processed, method='standardize')
+    advanced_processor = AdvancedProcessor(df_processed, method='normalize')
     df_final = advanced_processor.process()
 
     # Save to Parquet
