@@ -7,11 +7,11 @@ import sys
 from pathlib import Path
 
 import dotenv
-import numpy as np
-import yaml
+import torch
 from sklearn.ensemble import IsolationForest
 from torch.utils.data import DataLoader
 
+from my_utils import load_config
 from src.data.make_dataset import SensorDataset
 
 project_dir = Path(__file__).resolve().parents[2]
@@ -19,36 +19,49 @@ dotenv.load_dotenv(os.path.join(project_dir, '.env'))
 sys.path.append(str(project_dir))
 
 
-def load_config(config_path):
-    with open(config_path, 'r') as file:
-        return yaml.safe_load(file)
-
-
-class IsoForestAD:
-    def __init__(self, dataset, config, batch_size=1):
+class IsolationForestAD:
+    def __init__(self, dataset, config, batch_size=1, contamination=0.1):
         self.dataset = dataset
         self.config = config
         self.dataloader = DataLoader(
             dataset, batch_size=batch_size, shuffle=False)
+        self.contamination = contamination
 
     def prepare_data(self):
         """
         Prepare the data for anomaly detection.
         """
-        data_list = [self.dataset[i][1].numpy() for i in range(10)]
-        return np.array(data_list)  # .reshape(-1, 1)
+        sensor_data_list = []
+
+        for batch in self.dataloader:
+            sensor_data = batch[:, 1:]  # Exclude the timestamp column
+            sensor_data_list.append(sensor_data)
+
+        # Convert list of tensors to a single numpy array
+        sensor_data_np = torch.cat(sensor_data_list).numpy()
+        return sensor_data_np
 
     def detect_anomalies(self, data):
         """
-        Detect anomalies in the data.
+        Detect anomalies for each sensor.
         Args:
             data (np.ndarray): Numpy array of sensor data.
         Returns:
-            np.ndarray: Array of anomaly labels.
+            dict: Dictionary with sensor names as keys and anomaly labels as values.
         """
-        clf = IsolationForest(random_state=42)
-        clf.fit(data)
-        return clf.predict(data)
+        results = {}
+        num_sensors = data.shape[1]
+
+        for sensor_idx in range(num_sensors):
+            # Reshape for sklearn
+            sensor_data = data[:, sensor_idx].reshape(-1, 1)
+            clf = IsolationForest(
+                random_state=42, contamination=self.contamination)
+            clf.fit(sensor_data)
+            predictions = clf.predict(sensor_data)
+            sensor_name = f'sensor_{sensor_idx + 1}'
+            results[sensor_name] = predictions.tolist()
+        return results
 
 
 def main():
@@ -58,15 +71,18 @@ def main():
     config_path = os.path.join(project_dir, 'my_config.yaml')
     config = load_config(config_path)
 
-    dataset = SensorDataset(data_path, config)
+    dataset = SensorDataset(
+        data_path, config, time_window=config['time_window'])
 
-    anomaly_model = IsoForestAD(dataset, config)
+    anomaly_model = IsolationForestAD(
+        dataset, config, contamination=config['contamination'])
     prepared_data = anomaly_model.prepare_data()
 
     anomalies = anomaly_model.detect_anomalies(prepared_data)
-    # save results as JSON
+
     with open(results_path, 'w') as file:
-        json.dump(anomalies.tolist(), file)
+        json.dump(anomalies, file)
+    print('Anomaly detection results saved to results/iso1.json')
 
 
 if __name__ == "__main__":
