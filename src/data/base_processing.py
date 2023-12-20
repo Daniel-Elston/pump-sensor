@@ -1,23 +1,10 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
-import sys
-from pathlib import Path
-
-import dotenv
 import pandas as pd
 import pyarrow.parquet as pq
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
-
-from my_utils import load_config
-# import yaml
-# from my_utils import save_to_parquet
-
-project_dir = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(os.path.join(project_dir, '.env'))
-sys.path.append(str(project_dir))
 
 
 class BaseDataProcessing:
@@ -111,16 +98,16 @@ class BaseDataProcessing:
         return self.df
 
 
-def main():
-    data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
-    config_path = os.path.join(project_dir, 'my_config.yaml')
-    config = load_config(config_path)
+# def main():
+#     data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
+#     config_path = os.path.join(project_dir, 'my_config.yaml')
+#     config = load_config(config_path)
 
-    processor = BaseDataProcessing(data_path, config, config['time_window'])
-    processor.process()
+#     processor = BaseDataProcessing(data_path, config, config['time_window'])
+#     processor.process()
 
-    print(processor.df.head())
+#     print(processor.df.head())
 
 
-if __name__ == '__main__':
-    main()
+# if __name__ == '__main__':
+#     main()

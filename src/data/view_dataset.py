@@ -12,10 +12,6 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
-# from my_utils import load_config
-# from my_utils import save_to_parquet
-
-print(torch.__version__)  # PyTorch version = 2.2.0
 
 project_dir = Path(__file__).resolve().parents[2]
 dotenv.load_dotenv(os.path.join(project_dir, '.env'))
@@ -71,6 +67,7 @@ class SensorDataset(Dataset):
 
 
 def main(csv_file, index=None):
+
     path_to_csv_file = os.path.join(project_dir, csv_file)
     dataset = SensorDataset(csv_file=path_to_csv_file)
     dataloader = DataLoader(dataset, batch_size=4, shuffle=True)
@@ -89,14 +86,6 @@ def main(csv_file, index=None):
                 break
 
 
-# if __name__ == "__main__":
-#     parser = argparse.ArgumentParser(description="Process some integers.")
-#     parser.add_argument('--index',type=int,help='Index of the item to retrieve',required=False)
-#     args = parser.parse_args()
-
-#     main(index=args.index)
-
-
 if __name__ == "__main__":
     project_dir = Path(__file__).resolve().parents[2]  # Adjust if necessary
 
@@ -107,3 +96,5 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     main(csv_file=args.csv_file, index=args.index)
+
+# python view_dataset.py --index 4 ...data\raw\sensor.csv

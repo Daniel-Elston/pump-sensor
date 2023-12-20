@@ -1,22 +1,9 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import json
-import os
-import sys
-from pathlib import Path
-
-import dotenv
 import torch
 from sklearn.ensemble import IsolationForest
 from torch.utils.data import DataLoader
-
-from my_utils import load_config
-from src.data.make_dataset import SensorDataset
-
-project_dir = Path(__file__).resolve().parents[2]
-dotenv.load_dotenv(os.path.join(project_dir, '.env'))
-sys.path.append(str(project_dir))
 
 
 class IsolationForestAD:
@@ -64,26 +51,26 @@ class IsolationForestAD:
         return results
 
 
-def main():
-    data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
-    results_path = os.path.join(project_dir, 'results/iso1.json')
+# def main():
+#     data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
+#     results_path = os.path.join(project_dir, 'results/iso1.json')
 
-    config_path = os.path.join(project_dir, 'my_config.yaml')
-    config = load_config(config_path)
+#     config_path = os.path.join(project_dir, 'my_config.yaml')
+#     config = load_config(config_path)
 
-    dataset = SensorDataset(
-        data_path, config, time_window=config['time_window'])
+#     dataset = SensorDataset(
+#         data_path, config, time_window=config['time_window'])
 
-    anomaly_model = IsolationForestAD(
-        dataset, config, contamination=config['contamination'])
-    prepared_data = anomaly_model.prepare_data()
+#     anomaly_model = IsolationForestAD(
+#         dataset, config, contamination=config['contamination'])
+#     prepared_data = anomaly_model.prepare_data()
 
-    anomalies = anomaly_model.detect_anomalies(prepared_data)
+#     anomalies = anomaly_model.detect_anomalies(prepared_data)
 
-    with open(results_path, 'w') as file:
-        json.dump(anomalies, file)
-    print('Anomaly detection results saved to results/iso1.json')
+#     with open(results_path, 'w') as file:
+#         json.dump(anomalies, file)
+#     print('Anomaly detection results saved to results/iso1.json')
 
 
-if __name__ == "__main__":
-    main()
+# if __name__ == "__main__":
+#     main()
