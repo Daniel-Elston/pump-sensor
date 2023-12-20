@@ -2,25 +2,26 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import dotenv
 import torch
-import yaml
-from base_processing import BaseDataProcessing
 from torch.utils.data import Dataset
+
+from my_utils import load_config
+from src.data.base_processing import BaseDataProcessing
+# import pandas as pd
+# import yaml
+# from my_utils import save_to_parquet
 
 project_dir = Path(__file__).resolve().parents[2]
 dotenv.load_dotenv(os.path.join(project_dir, '.env'))
-
-
-def load_config(config_path):
-    with open(config_path, 'r') as file:
-        return yaml.safe_load(file)
+sys.path.append(str(project_dir))
 
 
 class SensorDataset(Dataset, BaseDataProcessing):
-    def __init__(self, data_path, config, method='normalize'):
+    def __init__(self, data_path, config, method='normalize', time_window='1min'):
         """
         Initialize the dataset object.
         Args:
@@ -28,9 +29,11 @@ class SensorDataset(Dataset, BaseDataProcessing):
             config (dict): Configuration parameters.
             method (str): Method to use for scaling the data.
         """
-        BaseDataProcessing.__init__(self, data_path, config, method=method)
+        BaseDataProcessing.__init__(
+            self, data_path, config, method=method, time_window=config['time_window'])
         self.data = self.process()  # Assuming this returns a DataFrame
         self.config = config
+        self.time_window = time_window
 
     def __getitem__(self, col):
         """
@@ -40,9 +43,10 @@ class SensorDataset(Dataset, BaseDataProcessing):
         Returns:
             torch.Tensor: A tensor representing a sequence of sensor readings.
         """
-        # Convert row to PyTorch tensor
-        numeric_data = self.data.select_dtypes(include=['number'])
-        return torch.tensor(numeric_data.iloc[:, col].values, dtype=torch.float)
+        # Convert col to PyTorch tensor
+        sensor_data = torch.tensor(
+            self.data.iloc[col].values, dtype=torch.float)
+        return sensor_data
 
     def __len__(self):
         return len(self.data)
@@ -53,9 +57,14 @@ def main():
     config_path = os.path.join(project_dir, 'my_config.yaml')
     config = load_config(config_path)
 
-    dataset = SensorDataset(data_path, config)
+    dataset = SensorDataset(data_path, config, config['time_window'])
+    print(dataset[0].head())
 
-    print(dataset[0])
+    # # Save to Parquet
+    # output_file_path = os.path.join(
+    #     project_dir, 'data/processed/processed_sensor.parq')
+    # save_to_parquet(df_final, output_file_path)
+    # print(f"Data saved: {output_file_path}")
 
 
 if __name__ == '__main__':

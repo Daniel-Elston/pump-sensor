@@ -2,26 +2,26 @@
 from __future__ import annotations
 
 import os
+import sys
 from pathlib import Path
 
 import dotenv
 import pandas as pd
 import pyarrow.parquet as pq
-import yaml
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
+from my_utils import load_config
+# import yaml
+# from my_utils import save_to_parquet
+
 project_dir = Path(__file__).resolve().parents[2]
 dotenv.load_dotenv(os.path.join(project_dir, '.env'))
-
-
-def load_config(config_path):
-    with open(config_path, 'r') as file:
-        return yaml.safe_load(file)
+sys.path.append(str(project_dir))
 
 
 class BaseDataProcessing:
-    def __init__(self, data_path, config, method='normalize'):
+    def __init__(self, data_path, config, method='normalize', time_window='1min'):
         """
         Initialize the BaseDataProcessing with a data path.
 
@@ -34,6 +34,7 @@ class BaseDataProcessing:
 
         self.method = method
         self.scaler = StandardScaler() if method == 'standardize' else MinMaxScaler()
+        self.time_window = time_window
 
     def load_data(self):
         """
@@ -55,11 +56,22 @@ class BaseDataProcessing:
         """
         self.df.ffill(inplace=True)
 
+    def resample_datetime(self):
+        """
+        Resample the data by datetime.
+        """
+        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+
+        self.df = self.df.set_index('timestamp')
+        self.df = self.df.resample(self.time_window).mean()
+        self.df = self.df.reset_index()
+
     def convert_data_types(self):
         """
         Convert data types to appropriate formats.
         """
-        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        # self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        self.df['timestamp'] = self.df['timestamp'].astype('int64') // 10**9
 
     def sort_by_timestamp(self):
         """
@@ -92,6 +104,7 @@ class BaseDataProcessing:
         self.load_data()
         self.select_data()
         self.handle_missing_values()
+        self.resample_datetime()
         self.convert_data_types()
         # self.sort_by_timestamp()
         self.scale_data()
@@ -103,7 +116,7 @@ def main():
     config_path = os.path.join(project_dir, 'my_config.yaml')
     config = load_config(config_path)
 
-    processor = BaseDataProcessing(data_path, config)
+    processor = BaseDataProcessing(data_path, config, config['time_window'])
     processor.process()
 
     print(processor.df.head())

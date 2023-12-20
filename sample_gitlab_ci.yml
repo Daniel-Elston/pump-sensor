@@ -1,8 +1,0 @@
-
-# Sample .gitlab-ci.yml content
-stages:
-  - test
-test:
-  script:
-    - echo "Running tests"
-    # Add testing scripts here

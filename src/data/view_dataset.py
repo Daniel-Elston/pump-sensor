@@ -3,6 +3,7 @@ from __future__ import annotations
 
 import argparse
 import os
+import sys
 from pathlib import Path
 
 import dotenv
@@ -11,10 +12,14 @@ import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
+# from my_utils import load_config
+# from my_utils import save_to_parquet
+
 print(torch.__version__)  # PyTorch version = 2.2.0
 
 project_dir = Path(__file__).resolve().parents[2]
 dotenv.load_dotenv(os.path.join(project_dir, '.env'))
+sys.path.append(str(project_dir))
 
 
 class SensorDataset(Dataset):
