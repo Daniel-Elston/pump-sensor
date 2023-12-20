@@ -11,6 +11,8 @@ from src.models.iso_forest import IsolationForestAD
 
 
 def main():
+
+    # Set up environment
     project_dir = setup_environment()
 
     data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
@@ -19,6 +21,7 @@ def main():
 
     config = load_config(config_path)
 
+    # Pipeline
     dataset = SensorDataset(
         data_path, config, time_window=config['time_window'])
 
@@ -28,6 +31,7 @@ def main():
 
     anomalies = anomaly_model.detect_anomalies(prepared_data)
 
+    # Save results
     save_to_json(anomalies, results_path)
 
 
