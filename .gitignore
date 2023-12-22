@@ -1,5 +1,8 @@
-
+src/features/scratch.py
 notebooks/views.ipynb
+notebooks/scores.ipynb
+
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

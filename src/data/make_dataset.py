@@ -18,7 +18,7 @@ class SensorDataset(Dataset, BaseDataProcessing):
         """
         BaseDataProcessing.__init__(
             self, data_path, config, method=method, time_window=config['time_window'])
-        self.data = self.process()  # Assuming this returns a DataFrame
+        self.data = self.process()  # Use parents' process method and store
         self.config = config
         self.time_window = time_window
 

@@ -37,18 +37,24 @@ class IsolationForestAD:
             dict: Dictionary with sensor names as keys and anomaly labels as values.
         """
         results = {}
+        scores = {}
         num_sensors = data.shape[1]
 
         for sensor_idx in range(num_sensors):
             # Reshape for sklearn
             sensor_data = data[:, sensor_idx].reshape(-1, 1)
+
             clf = IsolationForest(
                 random_state=42, contamination=self.contamination)
             clf.fit(sensor_data)
             predictions = clf.predict(sensor_data)
+
+            anomaly_score = clf.decision_function(sensor_data.reshape(-1, 1))
+
             sensor_name = f'sensor_{sensor_idx + 1}'
             results[sensor_name] = predictions.tolist()
-        return results
+            scores[sensor_name] = anomaly_score.tolist()
+        return results, scores
 
 
 # def main():
