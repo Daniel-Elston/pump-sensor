@@ -17,6 +17,7 @@ class BaseDataProcessing:
         """
         self.data_path = data_path
         self.config = config
+        self.raw_data = None
         self.df = None
 
         self.method = method
@@ -27,6 +28,7 @@ class BaseDataProcessing:
         """
         Load the data.
         """
+        self.raw_data = pq.read_table(self.data_path).to_pandas()
         self.df = pq.read_table(self.data_path).to_pandas()
 
     def select_data(self):

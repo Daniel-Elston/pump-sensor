@@ -10,7 +10,7 @@ Project Organization
     │   ├── external       <- Data from third party sources.
     │   ├── interim        <- Intermediate data that has been transformed.
     │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump.
+    │   └── raw            <- The original, immutable data dump. Found: https://www.kaggle.com/datasets/nphantawee/pump-sensor-data/data
     │
     ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
     │

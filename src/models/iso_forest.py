@@ -7,7 +7,7 @@ from torch.utils.data import DataLoader
 
 
 class IsolationForestAD:
-    def __init__(self, dataset, config, batch_size=1, contamination=0.1):
+    def __init__(self, dataset, config, batch_size=1, contamination=0.2):
         self.dataset = dataset
         self.config = config
         self.dataloader = DataLoader(
