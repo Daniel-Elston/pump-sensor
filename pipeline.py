@@ -10,9 +10,7 @@ import matplotlib.pyplot as plt
 from src.data.make_dataset import SensorDataset
 from src.models.iso_forest import IsolationForestAD
 from src.models.level_shift import LevelShiftDetector
-from src.visualization.visualize import apply_level_shifts
-from src.visualization.visualize import create_df
-from src.visualization.visualize import get_visuals
+from src.visualization.visualize import Visualiser
 from utils.file_log import Logger
 from utils.file_save import FileSaver
 from utils.setup_env import setup_project_env
@@ -44,16 +42,17 @@ def main():
         anomalies, scores = anomaly_model.detect_anomalies(prepared_data)
         logger.info('Anomaly detection completed')
 
-        df = create_df(config['sensor_n'], dataset,
-                       prepared_data, anomalies, scores)
+        visualise = Visualiser(config, config['sensor_n'])
+        df = visualise.create_df(
+            dataset, prepared_data, anomalies, scores)
 
         shift_detector = LevelShiftDetector(config, df)
         alarms = shift_detector.detect_shifts()
         logger.info('Level shift detection completed')
 
         # Visuals
-        get_visuals(config['sensor_n'], df)
-        apply_level_shifts(alarms, shift_type=config['shift_alg'])
+        visualise.get_visuals(df)
+        visualise.apply_level_shifts(alarms, shift_type=config['shift_alg'])
         plt.show()
         logger.info('Visuals created')
 
