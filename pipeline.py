@@ -30,7 +30,7 @@ def main():
     logger.info("Environment and configuration setup completed")
 
     data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
-    results_path = os.path.join(project_dir, 'results/iso2.json')
+    results_path = os.path.join(project_dir, 'results/iso1.json')
 
     # Pipeline
     try:
@@ -48,13 +48,12 @@ def main():
                        prepared_data, anomalies, scores)
 
         shift_detector = LevelShiftDetector(config, df)
-        alarms = shift_detector.ruptures_level_shift()
-        # alarms = shift_detector.adtk_level_shift()
+        alarms = shift_detector.detect_shifts()
         logger.info('Level shift detection completed')
 
         # Visuals
         get_visuals(config['sensor_n'], df)
-        apply_level_shifts(alarms, shift_type='ruptures')
+        apply_level_shifts(alarms, shift_type=config['shift_alg'])
         plt.show()
         logger.info('Visuals created')
 

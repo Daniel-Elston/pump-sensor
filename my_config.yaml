@@ -39,6 +39,8 @@ time_window: '30min'
 # sensor_n: 2
 # contamination: 0.1
 
+
+shift_alg: 'adtk' # ruptures/adtk
 sensor_n: 5
 contamination: 0.01
 n_bkps: 12
