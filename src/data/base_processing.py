@@ -24,6 +24,7 @@ class BaseDataProcessing:
         self.scaler = StandardScaler() if method == 'standardize' else MinMaxScaler()
         self.time_window = time_window
 
+    # LOADING
     def load_data(self):
         """
         Load the data.
@@ -39,35 +40,20 @@ class BaseDataProcessing:
         self.df = self.df.drop(self.config['cols_to_drop'], axis=1)
         self.df = self.df[['timestamp'] + self.config['sensors_to_use']]
 
+    # BASIC PROCESSING
     def handle_missing_values(self):
         """
         Handle missing values in the data.
         """
         self.df.ffill(inplace=True)
 
-    def resample_datetime(self):
+    def handle_nan_values(self):
         """
-        Resample the data by datetime.
+        Handle NaN values in the data.
         """
-        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        self.df.ffill(inplace=True)
 
-        self.df = self.df.set_index('timestamp')
-        self.df = self.df.resample(self.time_window).mean()
-        self.df = self.df.reset_index()
-
-    def convert_data_types(self):
-        """
-        Convert data types to appropriate formats.
-        """
-        # self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
-        self.df['timestamp'] = self.df['timestamp'].astype('int64') // 10**9
-
-    def sort_by_timestamp(self):
-        """
-        Sort the data by the timestamp column.
-        """
-        self.df.sort_values(by='timestamp', inplace=True)
-
+    # ADVANCED PROCESSING
     def scale_data(self):
         """
         Scale the data.
@@ -86,6 +72,32 @@ class BaseDataProcessing:
         # Reattach the timestamp column to the scaled DataFrame
         self.df = pd.concat([timestamp_col, scaled_df], axis=1)
 
+    # TIMESERIES
+    def resample_datetime(self):
+        """
+        Resample the data by datetime.
+        """
+        self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+
+        self.df = self.df.set_index('timestamp')
+        self.df = self.df.resample(self.time_window).mean()
+        self.df = self.df.reset_index()
+
+    def convert_data_types(self):
+        """
+        Convert data types to appropriate formats.
+        """
+        # self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
+        self.df['timestamp'] = self.df['timestamp'].astype(
+            'int64') // 10**9  # to UNIX
+
+    def sort_by_timestamp(self):
+        """
+        Sort the data by the timestamp column.
+        """
+        self.df.sort_values(by='timestamp', inplace=True)
+
+    # PIPELINE
     def process(self):
         """
         Perform initial processing on the data.
