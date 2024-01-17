@@ -2,39 +2,12 @@
 from __future__ import annotations
 
 import matplotlib.pyplot as plt
-import pandas as pd
 
 
 class Visualiser:
     def __init__(self, config, sensor_n):
         self.config = config
         self.sensor_n = sensor_n
-
-    def create_df(self, dataset, prepared_data, anomalies, scores):
-        """
-        Create a DataFrame from the sensor data, anomalies, and scores.
-
-        Args:
-            sensor_n (int): The sensor number to process.
-            dataset (SensorDataset): The dataset containing the sensor data.
-            prepared_data (np.array): The prepared sensor data.
-            anomalies (np.array): Anomaly flags for the data.
-            scores (np.array): Anomaly scores for the data.
-
-        Returns:
-            pd.DataFrame: A DataFrame with the processed data.
-        """
-        df = pd.DataFrame(
-            {
-                'timestamp': pd.to_datetime((dataset.data.timestamp.values), unit='s'),
-                'unix': dataset.data.timestamp.values,
-                f'sensor_{self.sensor_n}': prepared_data[:, self.sensor_n-1],
-                'anomaly': anomalies[f'sensor_{self.sensor_n}'],
-                'score': scores[f'sensor_{self.sensor_n}']
-            }
-        )
-        df.set_index('timestamp', inplace=True)
-        return df
 
     def get_visuals(self, df):
         """

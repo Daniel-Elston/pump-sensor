@@ -1,12 +1,12 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import os
 import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
 
+from src.data.make_dataset import create_df
 from src.data.make_dataset import SensorDataset
 from src.models.iso_forest import IsolationForestAD
 from src.models.level_shift import LevelShiftDetector
@@ -17,54 +17,86 @@ from utils.setup_env import setup_project_env
 warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 
-logger = Logger('PipelineLogger', f'{Path(__file__).stem}.log').get_logger()
+class DataPipeline:
+    def __init__(self, config, project_dir, data_path, results_path):
+        self.config = config
+        self.logger = Logger('PipelineLogger', f'{
+                             Path(__file__).stem}.log').get_logger()
+        self.project_dir = project_dir
+        self.data_path = data_path
+        self.results_path = results_path
 
+    # def setup_env(self):
+    #     try:
+    #         config, project_dir, data_path, results_path = setup_project_env()
+    #         self.logger.info("Environment and configuration setup completed")
+    #         return data_path, results_path, config
+    #     except Exception as e:
+    #         self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
-def main():
-    logger.info("Pipeline started")
+    def form_initial_dataset(self):
+        try:
+            dataset = SensorDataset(
+                self.data_path, self.config, time_window=self.config['time_window'])
 
-    # Set up environment
-    project_dir, config = setup_project_env()
-    logger.info("Environment and configuration setup completed")
+            anomaly_model = IsolationForestAD(dataset, self.config)
+            prepared_data = anomaly_model.prepare_data()
+            self.logger.info(f'Dataset loaded from {self.data_path}')
+            return dataset, prepared_data
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
-    data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
-    results_path = os.path.join(project_dir, 'results/iso1.json')
+    def detect_anomalies(self, prepared_data):
+        try:
+            anomaly_model = IsolationForestAD(prepared_data, self.config)
 
-    # Pipeline
-    try:
-        dataset = SensorDataset(
-            data_path, config, time_window=config['time_window'])
-        logger.info(f'Dataset loaded from {data_path}')
+            anomalies, scores = anomaly_model.detect_anomalies(prepared_data)
+            self.logger.info('Anomaly detection completed')
+            return anomalies, scores
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
-        anomaly_model = IsolationForestAD(dataset, config)
-        prepared_data = anomaly_model.prepare_data()
+    def detect_level_shift(self, df):
+        try:
+            shift_detector = LevelShiftDetector(self.config, df)
+            alarms = shift_detector.detect_shifts()
+            self.logger.info('Level shift detection completed')
+            return alarms
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
-        anomalies, scores = anomaly_model.detect_anomalies(prepared_data)
-        logger.info('Anomaly detection completed')
+    def generate_visualise(self, df, alarms):
+        try:
+            visualise = Visualiser(self.config, self.config['sensor_n'])
+            visualise.get_visuals(df)
+            visualise.apply_level_shifts(
+                alarms, shift_type=self.config['shift_alg'])
+            return plt.show()
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
-        visualise = Visualiser(config, config['sensor_n'])
-        df = visualise.create_df(
-            dataset, prepared_data, anomalies, scores)
+    def run(self):
+        self.logger.info(
+            '====================================================')
+        self.logger.info('Beginning pipeline')
+        try:
+            # self.setup_env()
+            dataset, prepared_data = self.form_initial_dataset()
+            anomalies, scores = self.detect_anomalies(prepared_data)
+            df = create_df(self.config, dataset,
+                           prepared_data, anomalies, scores)
+            alarms = self.detect_level_shift(df)
+            self.generate_visualise(df, alarms)
+            FileSaver().save_file(anomalies, self.results_path)
+            self.logger.info(f'Anomaly detection results saved to {
+                             self.results_path}')
 
-        shift_detector = LevelShiftDetector(config, df)
-        alarms = shift_detector.detect_shifts()
-        logger.info('Level shift detection completed')
-
-        # Visuals
-        visualise.get_visuals(df)
-        visualise.apply_level_shifts(alarms, shift_type=config['shift_alg'])
-        plt.show()
-        logger.info('Visuals created')
-
-        # Save results
-        FileSaver().save_file(anomalies, results_path)
-        logger.info(f'Anomaly detection results saved to {results_path}')
-
-    except Exception as e:
-        logger.error(f'Error in pipeline: {e}', exc_info=True)
-
-    logger.info("Pipeline completed successfully")
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
+        self.logger.info("Pipeline completed successfully")
 
 
 if __name__ == "__main__":
-    main()
+    project_dir, config, data_path, results_path = setup_project_env()
+    pipeline = DataPipeline(config, project_dir, data_path, results_path)
+    pipeline.run()

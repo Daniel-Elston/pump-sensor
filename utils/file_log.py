@@ -6,7 +6,7 @@ from logging.handlers import RotatingFileHandler
 
 class Logger:
     def __init__(
-            self, name, log_file, level=logging.INFO, separator='='*60 + '\n'):
+            self, name, log_file, level=logging.INFO):
         """
         Initialize the Logger.
 
@@ -36,7 +36,7 @@ class Logger:
         self.logger.addHandler(console_handler)
 
         # Log separator
-        self.logger.info(separator)
+        # self.logger.info(separator)
 
     def get_logger(self):
         """

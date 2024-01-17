@@ -42,7 +42,7 @@ class LevelShiftDetector:
         series = self.df[f'sensor_{self.sensor_n}']
         algo = rpt.Binseg(model=model, min_size=75)
         algo.fit(series.values)
-        result = algo.predict(n_bkps=self.n_bkps)
+        result = algo.predict(self.n_bkps)
 
         alarms = pd.Series(False, index=series.index)
         for cp in result[:-1]:  # Skip the last one as it is just the end of the series

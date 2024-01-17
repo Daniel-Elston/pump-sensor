@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+import pandas as pd
 import torch
 from torch.utils.data import Dataset
 
@@ -37,6 +38,33 @@ class SensorDataset(Dataset, BaseDataProcessing):
 
     def __len__(self):
         return len(self.data)
+
+
+def create_df(config, dataset, prepared_data, anomalies, scores):
+    """
+    Create a DataFrame from the sensor data, anomalies, and scores.
+
+    Args:
+        sensor_n (int): The sensor number to process.
+        dataset (SensorDataset): The dataset containing the sensor data.
+        prepared_data (np.array): The prepared sensor data.
+        anomalies (np.array): Anomaly flags for the data.
+        scores (np.array): Anomaly scores for the data.
+
+    Returns:
+        pd.DataFrame: A DataFrame with the processed data.
+    """
+    df = pd.DataFrame(
+        {
+            'timestamp': pd.to_datetime((dataset.data.timestamp.values), unit='s'),
+            'unix': dataset.data.timestamp.values,
+            f'sensor_{config['sensor_n']}': prepared_data[:, config['sensor_n']-1],
+            'anomaly': anomalies[f'sensor_{config['sensor_n']}'],
+            'score': scores[f'sensor_{config['sensor_n']}']
+        }
+    )
+    df.set_index('timestamp', inplace=True)
+    return df
 
 
 # def main():
