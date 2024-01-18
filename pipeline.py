@@ -5,8 +5,8 @@ import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
+import pandas as pd
 
-from src.data.make_dataset import create_df
 from src.data.make_dataset import SensorDataset
 from src.models.iso_forest import IsolationForestAD
 from src.models.level_shift import LevelShiftDetector
@@ -18,23 +18,22 @@ warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 
 class DataPipeline:
-    def __init__(self, config, project_dir, data_path, results_path):
+    def __init__(self, config, project_dir, data_path, results_path, file_saver=FileSaver()):
         self.config = config
         self.logger = Logger('PipelineLogger', f'{
                              Path(__file__).stem}.log').get_logger()
         self.project_dir = project_dir
         self.data_path = data_path
         self.results_path = results_path
-
-    # def setup_env(self):
-    #     try:
-    #         config, project_dir, data_path, results_path = setup_project_env()
-    #         self.logger.info("Environment and configuration setup completed")
-    #         return data_path, results_path, config
-    #     except Exception as e:
-    #         self.logger.error(f'Error in pipeline: {e}', exc_info=True)
+        self.file_saver = FileSaver()
 
     def form_initial_dataset(self):
+        """
+        Form the initial dataset from the raw data.
+        Returns:
+            dataset (SensorDataset): Dataset object.
+            prepared_data (pd.DataFrame): Prepared data.
+        """
         try:
             dataset = SensorDataset(
                 self.data_path, self.config, time_window=self.config['time_window'])
@@ -47,6 +46,14 @@ class DataPipeline:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
     def detect_anomalies(self, prepared_data):
+        """
+        Detect anomalies in the prepared data.
+        Args:
+            prepared_data (pd.DataFrame): Prepared data.
+        Returns:
+            anomalies (pd.DataFrame): Anomalies detected.
+            scores (pd.DataFrame): Scores for each data point.
+        """
         try:
             anomaly_model = IsolationForestAD(prepared_data, self.config)
 
@@ -56,7 +63,40 @@ class DataPipeline:
         except Exception as e:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
+    def create_df(self, dataset, prepared_data, anomalies, scores):
+        """
+        Create a dataframe from the prepared data.
+        Args:
+            dataset (SensorDataset): Dataset object.
+            prepared_data (pd.DataFrame): Prepared data.
+            anomalies (pd.DataFrame): Anomalies detected.
+            scores (pd.DataFrame): Scores for each data point.
+        Returns:
+            df (pd.DataFrame): Dataframe containing the prepared data.
+        """
+        try:
+            df = pd.DataFrame(
+                {
+                    'timestamp': pd.to_datetime((dataset.data.timestamp.values), unit='s'),
+                    'unix': dataset.data.timestamp.values,
+                    f'sensor_{self.config['sensor_n']}': prepared_data[:, self.config['sensor_n']-1],
+                    'anomaly': anomalies[f'sensor_{self.config['sensor_n']}'],
+                    'score': scores[f'sensor_{self.config['sensor_n']}']
+                }
+            )
+            df.set_index('timestamp', inplace=True)
+            return df
+        except Exception as e:
+            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
+
     def detect_level_shift(self, df):
+        """
+        Detect level shifts in the prepared data.
+        Args:
+            df (pd.DataFrame): Dataframe containing the prepared data.
+        Returns:
+            alarms (pd.DataFrame): Level shift alarms.
+        """
         try:
             shift_detector = LevelShiftDetector(self.config, df)
             alarms = shift_detector.detect_shifts()
@@ -66,6 +106,12 @@ class DataPipeline:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
     def generate_visualise(self, df, alarms):
+        """
+        Generate and visualise the results.
+        Args:
+            df (pd.DataFrame): Dataframe containing the prepared data.
+            alarms (pd.DataFrame): Level shift alarms.
+        """
         try:
             visualise = Visualiser(self.config, self.config['sensor_n'])
             visualise.get_visuals(df)
@@ -83,11 +129,10 @@ class DataPipeline:
             # self.setup_env()
             dataset, prepared_data = self.form_initial_dataset()
             anomalies, scores = self.detect_anomalies(prepared_data)
-            df = create_df(self.config, dataset,
-                           prepared_data, anomalies, scores)
+            df = self.create_df(dataset, prepared_data, anomalies, scores)
             alarms = self.detect_level_shift(df)
             self.generate_visualise(df, alarms)
-            FileSaver().save_file(anomalies, self.results_path)
+            self.file_saver.save_file(anomalies, self.results_path)
             self.logger.info(f'Anomaly detection results saved to {
                              self.results_path}')
 
