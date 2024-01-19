@@ -11,13 +11,16 @@ import yaml
 
 from utils.file_load import FileLoader
 from utils.file_log import Logger
+from utils.setup_env import setup_project_env
 # import feather
+project_dir, config, data_path, results_path = setup_project_env()
 
 
 class FileSaver:
     def __init__(self):
-        self.logger = Logger(f'{self.__class__.__name__}',
-                             f'{Path(__file__).stem}.log').get_logger()
+        self.logger = Logger(
+            f'{self.__class__.__name__}',
+            f'{Path(__file__).stem}.log').get_logger()
 
     def save_file(self, data, file_path):
         """

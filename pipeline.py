@@ -4,7 +4,6 @@ from __future__ import annotations
 import warnings
 from pathlib import Path
 
-import matplotlib.pyplot as plt
 import pandas as pd
 
 from src.data.make_dataset import SensorDataset
@@ -14,14 +13,15 @@ from src.visualization.visualize import Visualiser
 from utils.file_log import Logger
 from utils.file_save import FileSaver
 from utils.setup_env import setup_project_env
+# import matplotlib.pyplot as plt
 warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 
 class DataPipeline:
-    def __init__(self, config, project_dir, data_path, results_path, file_saver=FileSaver()):
+    def __init__(self, project_dir, config, data_path, results_path, file_saver=FileSaver()):
         self.config = config
-        self.logger = Logger('PipelineLogger', f'{
-                             Path(__file__).stem}.log').get_logger()
+        self.logger = Logger(
+            'PipelineLogger', f'{Path(__file__).stem}.log').get_logger()
         self.project_dir = project_dir
         self.data_path = data_path
         self.results_path = results_path
@@ -117,7 +117,7 @@ class DataPipeline:
             visualise.get_visuals(df)
             visualise.apply_level_shifts(
                 alarms, shift_type=self.config['shift_alg'])
-            return plt.show()
+            # return plt.show()
         except Exception as e:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
 
@@ -126,15 +126,14 @@ class DataPipeline:
             '====================================================')
         self.logger.info('Beginning pipeline')
         try:
-            # self.setup_env()
             dataset, prepared_data = self.form_initial_dataset()
             anomalies, scores = self.detect_anomalies(prepared_data)
             df = self.create_df(dataset, prepared_data, anomalies, scores)
             alarms = self.detect_level_shift(df)
             self.generate_visualise(df, alarms)
             self.file_saver.save_file(anomalies, self.results_path)
-            self.logger.info(f'Anomaly detection results saved to {
-                             self.results_path}')
+            self.logger.info(
+                f'Anomaly detection results saved to {self.results_path}')
 
         except Exception as e:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
@@ -143,5 +142,5 @@ class DataPipeline:
 
 if __name__ == "__main__":
     project_dir, config, data_path, results_path = setup_project_env()
-    pipeline = DataPipeline(config, project_dir, data_path, results_path)
+    pipeline = DataPipeline(project_dir, config, data_path, results_path)
     pipeline.run()

@@ -29,6 +29,11 @@ def setup_project_env(
     data_path = os.path.join(project_dir, config['data_path'])
     results_path = os.path.join(project_dir, config['results_path'])
 
+    # print(f'Project directory: {project_dir}')
+    # print(f'Data path: {data_path}')
+    # print(f'Results path: {results_path}')
+    # print(f'Configuration path: {config_path}')
+
     return project_dir, config, data_path, results_path
 
 
