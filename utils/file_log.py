@@ -44,8 +44,7 @@ class Logger:
         self.logger.addHandler(file_handler)
         self.logger.addHandler(console_handler)
 
-        # Log separator
-        # self.logger.info(separator)
+        # generate log separator
 
     def get_logger(self):
         """

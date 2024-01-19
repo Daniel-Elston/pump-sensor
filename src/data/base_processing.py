@@ -112,9 +112,6 @@ class BaseDataProcessing:
         """
         Perform initial processing on the data.
         """
-        self.logger.info(
-            '====================================================')
-        self.logger.info('Beginning Base Processing')
         self.load_data()
         self.select_data()
         self.handle_missing_values()
@@ -122,23 +119,9 @@ class BaseDataProcessing:
         self.convert_data_types()
         # self.sort_by_timestamp()
         self.scale_data()
+
         self.logger.info('Base Processing completed')
         self.logger.info(f"Final dataset shape: {self.df.shape}")
         self.logger.debug(f"Final dataset sample:\n{self.df.sample(5)}")
 
         return self.df
-
-
-# def main():
-#     data_path = os.path.join(project_dir, 'data/sdo/sensor.parq')
-#     config_path = os.path.join(project_dir, 'my_config.yaml')
-#     config = load_config(config_path)
-
-#     processor = BaseDataProcessing(data_path, config, config['time_window'])
-#     processor.process()
-
-#     print(processor.df.head())
-
-
-# if __name__ == '__main__':
-#     main()

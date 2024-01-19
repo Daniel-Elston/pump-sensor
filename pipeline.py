@@ -127,6 +127,7 @@ class DataPipeline:
         self.logger.info('Beginning pipeline')
         try:
             dataset, prepared_data = self.form_initial_dataset()
+            dataset.log_summary()
             anomalies, scores = self.detect_anomalies(prepared_data)
             df = self.create_df(dataset, prepared_data, anomalies, scores)
             alarms = self.detect_level_shift(df)
