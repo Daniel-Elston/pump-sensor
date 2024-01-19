@@ -1,36 +1,42 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
-import pyarrow.parquet as pq
 from sklearn.preprocessing import MinMaxScaler
 from sklearn.preprocessing import StandardScaler
 
+from utils.file_load import FileLoader
+from utils.file_log import Logger
+
 
 class BaseDataProcessing:
-    def __init__(self, data_path, config, method='normalize', time_window='1min'):
+    def __init__(self, data_path, config, time_window, method='normalize'):
         """
         Initialize the BaseDataProcessing with a data path.
 
         Args:
             data_path (str): Path to the data.
         """
+        self.logger = Logger(
+            'BaseProcessLog', f'{Path(__file__).stem}.log').get_logger()
         self.data_path = data_path
         self.config = config
         self.raw_data = None
         self.df = None
 
         self.method = method
-        self.scaler = StandardScaler() if method == 'standardize' else MinMaxScaler()
         self.time_window = time_window
+        self.scaler = StandardScaler() if method == 'standardize' else MinMaxScaler()
 
-    # LOADING
     def load_data(self):
         """
         Load the data.
         """
-        self.raw_data = pq.read_table(self.data_path).to_pandas()
-        self.df = pq.read_table(self.data_path).to_pandas()
+        self.df = FileLoader().load_file(self.data_path)
+        self.logger.info(f'Initial dataset shape {self.df.shape}')
+        self.logger.debug(f'Initial dataset sample:\n{self.df.sample(5)}')
 
     def select_data(self):
         """
@@ -71,8 +77,10 @@ class BaseDataProcessing:
 
         # Reattach the timestamp column to the scaled DataFrame
         self.df = pd.concat([timestamp_col, scaled_df], axis=1)
+        self.logger.info(f'Dataset scaled using {self.method}')
 
     # TIMESERIES
+
     def resample_datetime(self):
         """
         Resample the data by datetime.
@@ -82,6 +90,7 @@ class BaseDataProcessing:
         self.df = self.df.set_index('timestamp')
         self.df = self.df.resample(self.time_window).mean()
         self.df = self.df.reset_index()
+        self.logger.info(f'Dataset resampled by {self.time_window}')
 
     def convert_data_types(self):
         """
@@ -90,6 +99,7 @@ class BaseDataProcessing:
         # self.df['timestamp'] = pd.to_datetime(self.df['timestamp'])
         self.df['timestamp'] = self.df['timestamp'].astype(
             'int64') // 10**9  # to UNIX
+        self.logger.info('Timestamp converted to UNIX')
 
     def sort_by_timestamp(self):
         """
@@ -102,6 +112,9 @@ class BaseDataProcessing:
         """
         Perform initial processing on the data.
         """
+        self.logger.info(
+            '====================================================')
+        self.logger.info('Beginning Base Processing')
         self.load_data()
         self.select_data()
         self.handle_missing_values()
@@ -109,6 +122,10 @@ class BaseDataProcessing:
         self.convert_data_types()
         # self.sort_by_timestamp()
         self.scale_data()
+        self.logger.info('Base Processing completed')
+        self.logger.info(f"Final dataset shape: {self.df.shape}")
+        self.logger.debug(f"Final dataset sample:\n{self.df.sample(5)}")
+
         return self.df
 
 

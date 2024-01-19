@@ -21,7 +21,7 @@ class DataPipeline:
     def __init__(self, project_dir, config, data_path, results_path, file_saver=FileSaver()):
         self.config = config
         self.logger = Logger(
-            'PipelineLogger', f'{Path(__file__).stem}.log').get_logger()
+            'PipelineLog', f'{Path(__file__).stem}.log').get_logger()
         self.project_dir = project_dir
         self.data_path = data_path
         self.results_path = results_path

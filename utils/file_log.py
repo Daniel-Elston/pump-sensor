@@ -5,7 +5,6 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from utils.setup_env import setup_project_env
-# import yaml
 project_dir, config, data_path, results_path = setup_project_env()
 
 
@@ -28,6 +27,9 @@ class Logger:
         file_handler = RotatingFileHandler(
             os.path.join(project_dir, f'log/{log_file}'), maxBytes=1000000, backupCount=5)
         console_handler = logging.StreamHandler()
+
+        # Set levels manually
+        console_handler.setLevel(logging.INFO)
 
         # Create formatters and add to handlers
         file_formatter = logging.Formatter(
