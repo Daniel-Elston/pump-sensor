@@ -3,6 +3,7 @@
 # Paths
 data_path: 'data/sdo/sensor.parq'
 results_path: 'results/iso1.json'
+model_path: 'models/iso1.pth'
 
 # Log Parameters
 logging:

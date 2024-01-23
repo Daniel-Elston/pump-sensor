@@ -16,7 +16,7 @@ class IsolationForestAD:
 
     def prepare_data(self):
         """
-        Prepare the data for anomaly detection.
+        Prepare the data for anomaly detection, usable by sklearn.
         """
         sensor_data_list = []
 

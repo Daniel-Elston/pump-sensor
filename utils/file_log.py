@@ -5,7 +5,7 @@ import os
 from logging.handlers import RotatingFileHandler
 
 from utils.setup_env import setup_project_env
-project_dir, config, data_path, results_path = setup_project_env()
+project_dir, config = setup_project_env()
 
 
 class Logger:

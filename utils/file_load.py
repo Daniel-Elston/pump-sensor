@@ -1,11 +1,9 @@
 from __future__ import annotations
 
 import json
-import os
 import pickle
 from pathlib import Path
 
-import dotenv
 import pandas as pd
 import pyarrow.parquet as pq
 import yaml
@@ -93,19 +91,3 @@ class FileLoader:
         # Load feather file
         # """
         # return feather.read_dataframe(file_path)
-
-
-def main():
-    project_dir = Path(__file__).resolve().parents[1]
-    dotenv.load_dotenv(os.path.join(project_dir, '.env'))
-
-    load_path = os.path.join(
-        project_dir, 'file-loader/examples/test1.xls')
-
-    loader = FileLoader()
-    get_data = loader.load_file(load_path)  # , sheets='all')
-    print(get_data)
-
-
-if __name__ == "__main__":
-    main()

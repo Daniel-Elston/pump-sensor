@@ -1,6 +1,5 @@
 from __future__ import annotations
 
-import os
 from pathlib import Path
 
 import dotenv
@@ -25,22 +24,8 @@ def setup_project_env(
     with open(config_path, 'r', encoding='utf-8') as file:
         config = yaml.safe_load(file)
 
-    # Get Paths
-    data_path = os.path.join(project_dir, config['data_path'])
-    results_path = os.path.join(project_dir, config['results_path'])
-
-    # print(f'Project directory: {project_dir}')
-    # print(f'Data path: {data_path}')
-    # print(f'Results path: {results_path}')
-    # print(f'Configuration path: {config_path}')
-
-    return project_dir, config, data_path, results_path
+    return project_dir, config
 
 
 if __name__ == '__main__':
-    project_dir, config, data_path, results_path = setup_project_env()
-
-
-# # in pipeline.py
-# from my_utils.setup_env_util import setup_project_env
-# project_dir, config = setup_project_env()
+    project_dir, config = setup_project_env()
