@@ -4,6 +4,7 @@ from __future__ import annotations
 from pathlib import Path
 
 import torch
+from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
 
 from src.data.base_processing import BaseDataProcessing
@@ -11,7 +12,7 @@ from utils.file_log import Logger
 
 
 class SensorDataset(Dataset, BaseDataProcessing):
-    def __init__(self, data_path, config, method='normalize', time_window='1min'):
+    def __init__(self, data_path, config, method='normalize'):
         """
         Initialize the dataset object.
         Args:
@@ -23,10 +24,35 @@ class SensorDataset(Dataset, BaseDataProcessing):
             'MakeDatasetLog', f'{Path(__file__).stem}.log').get_logger()
         BaseDataProcessing.__init__(
             self, data_path, config, method=method, time_window=config['time_window'])
-        self.data = self.process()  # Use parents' process method and store
+        self.dataloader = DataLoader(
+            self, batch_size=config['batch_size'], shuffle=False)
         self.config = config
-        self.time_window = time_window
+        self.time_window = config['time_window']
         self.processed_items = 0
+        self.detection_algorithm = config['detection_alg']
+        self.data = self.process()  # Use parents' process method and store
+
+        # if self.detection_alg == 'iso':
+        #     self.data = self.prepare_iso_data()
+        # elif self.detection_alg == 'lstm':
+        #     self.data = self.prepare_lstm_data()
+
+    def prepare_iso_data(self):
+        """
+        Prepare the data for anomaly detection, usable by sklearn.
+        """
+        sensor_data_list = []
+
+        for batch in self.dataloader:
+            sensor_data = batch[:, 1:]  # Exclude the timestamp column
+            sensor_data_list.append(sensor_data)
+
+        # Convert list of tensors to a single numpy array
+        sensor_data_np = torch.cat(sensor_data_list).numpy()
+        return sensor_data_np
+
+    def prepare_lstm_data(self):
+        pass
 
     def __getitem__(self, col):
         """
@@ -39,7 +65,7 @@ class SensorDataset(Dataset, BaseDataProcessing):
         # Convert col to PyTorch tensor
         sensor_data = torch.tensor(
             self.data.iloc[col].values, dtype=torch.float)
-        self.processed_items += 1
+        self.processed_items += 1  # Counter for logging
         return sensor_data
 
     def __len__(self):

@@ -18,14 +18,14 @@ warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 
 class DataPipeline:
-    def __init__(self, project_dir, config, file_saver=FileSaver()):
+    def __init__(self, project_dir, config, fs=FileSaver()):
         self.config = config
         self.logger = Logger(
             'PipelineLog', f'{Path(__file__).stem}.log').get_logger()
         self.project_dir = project_dir
         self.data_path = config['data_path']
         self.results_path = config['results_path']
-        self.file_saver = FileSaver()
+        self.fs = FileSaver()
 
     def form_initial_dataset(self):
         """
@@ -36,10 +36,9 @@ class DataPipeline:
         """
         try:
             dataset = SensorDataset(
-                self.data_path, self.config, time_window=self.config['time_window'])
+                self.data_path, self.config)
 
-            anomaly_model = IsolationForestAD(dataset, self.config)
-            prepared_data = anomaly_model.prepare_data()
+            prepared_data = dataset.prepare_iso_data()
             self.logger.info(f'Dataset loaded from {self.data_path}')
             return dataset, prepared_data
         except Exception as e:
@@ -55,7 +54,7 @@ class DataPipeline:
             scores (pd.DataFrame): Scores for each data point.
         """
         try:
-            anomaly_model = IsolationForestAD(prepared_data, self.config)
+            anomaly_model = IsolationForestAD(self.config)
 
             anomalies, scores = anomaly_model.detect_anomalies(prepared_data)
             self.logger.info('Anomaly detection completed')
@@ -132,7 +131,7 @@ class DataPipeline:
             df = self.create_df(dataset, prepared_data, anomalies, scores)
             alarms = self.detect_level_shift(df)
             self.generate_visualise(df, alarms)
-            self.file_saver.save_file(anomalies, self.results_path)
+            self.fs.save_file(anomalies, self.results_path)
             self.logger.info(
                 f'Anomaly detection results saved to {self.results_path}')
 

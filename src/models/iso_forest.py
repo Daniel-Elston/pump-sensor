@@ -1,32 +1,13 @@
 # -*- coding: utf-8 -*-
 from __future__ import annotations
 
-import torch
 from sklearn.ensemble import IsolationForest
-from torch.utils.data import DataLoader
 
 
 class IsolationForestAD:
-    def __init__(self, dataset, config, batch_size=1):
-        self.dataset = dataset
+    def __init__(self, config):
         self.config = config
-        self.dataloader = DataLoader(
-            dataset, batch_size=batch_size, shuffle=False)
         self.contamination = config['contamination']
-
-    def prepare_data(self):
-        """
-        Prepare the data for anomaly detection, usable by sklearn.
-        """
-        sensor_data_list = []
-
-        for batch in self.dataloader:
-            sensor_data = batch[:, 1:]  # Exclude the timestamp column
-            sensor_data_list.append(sensor_data)
-
-        # Convert list of tensors to a single numpy array
-        sensor_data_np = torch.cat(sensor_data_list).numpy()
-        return sensor_data_np
 
     def detect_anomalies(self, data):
         """
