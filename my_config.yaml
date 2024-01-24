@@ -1,7 +1,7 @@
 # my_config.yaml
 
 # Detection Algorithm
-detection_alg: 'lstm' # lstm/iso
+detection_alg: 'iso' # lstm/iso
 
 # Paths
 data_path: 'data/sdo/sensor.parq'
@@ -36,9 +36,16 @@ batch_size: 1
 overlap: 0
 seq_length: 10
 
-# Model Parameters
+# Isolation Forest Parameters
 shift_alg: 'adtk'                     # ruptures/adtk
 contamination: 0.025
 n_bkps: 12
 c: 4.0
 window: 24
+
+# LSTM Parameters
+n_features: 1
+hidden_size: 64
+num_layers: 2
+learning_rate: 0.001
+n_epochs: 10

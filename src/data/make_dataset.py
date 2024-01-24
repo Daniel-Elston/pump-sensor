@@ -3,6 +3,7 @@ from __future__ import annotations
 
 from pathlib import Path
 
+import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
@@ -24,12 +25,10 @@ class SensorDataset(Dataset, BaseDataProcessing):
             'MakeDatasetLog', f'{Path(__file__).stem}.log').get_logger()
         BaseDataProcessing.__init__(
             self, data_path, config, method=method, time_window=config['time_window'])
-        self.dataloader = DataLoader(
-            self, batch_size=config['batch_size'], shuffle=False)
         self.config = config
         self.time_window = config['time_window']
         self.processed_items = 0
-        self.detection_algorithm = config['detection_alg']
+        self.detection_alg = config['detection_alg']
         self.data = self.process()  # Use parents' process method and store
 
         # if self.detection_alg == 'iso':
@@ -41,9 +40,11 @@ class SensorDataset(Dataset, BaseDataProcessing):
         """
         Prepare the data for anomaly detection, usable by sklearn.
         """
+        dataloader = DataLoader(
+            self, batch_size=self.config['batch_size'], shuffle=False)
         sensor_data_list = []
 
-        for batch in self.dataloader:
+        for batch in dataloader:
             sensor_data = batch[:, 1:]  # Exclude the timestamp column
             sensor_data_list.append(sensor_data)
 
@@ -51,10 +52,25 @@ class SensorDataset(Dataset, BaseDataProcessing):
         sensor_data_np = torch.cat(sensor_data_list).numpy()
         return sensor_data_np
 
-    def prepare_lstm_data(self):
-        pass
+    def prepare_data_lstm(self):
+        """
+        Prepare data for LSTM model.
+        """
+        seq_length = self.config['seq_length']
+        overlap = self.config['overlap']
 
-    def __getitem__(self, col):
+        # Convert DataFrame to numpy array
+        data_array = self.data.values
+
+        # Create segments
+        segments = []
+        for start_pos in range(0, len(data_array) - seq_length, seq_length - overlap):
+            end_pos = start_pos + seq_length
+            segment = data_array[start_pos:end_pos]
+            segments.append(segment)
+        return np.array(segments)
+
+    def __getitem__(self, idx):
         """
         Retrieve a single sample from the dataset.
         Args:
@@ -62,11 +78,20 @@ class SensorDataset(Dataset, BaseDataProcessing):
         Returns:
             torch.Tensor: A tensor representing a sequence of sensor readings.
         """
-        # Convert col to PyTorch tensor
-        sensor_data = torch.tensor(
-            self.data.iloc[col].values, dtype=torch.float)
-        self.processed_items += 1  # Counter for logging
-        return sensor_data
+        if self.detection_alg == 'iso':
+            # Convert col to PyTorch tensor
+            sensor_data = torch.tensor(
+                self.data.iloc[idx].values, dtype=torch.float)
+            self.processed_items += 1  # Counter for logging
+            return sensor_data
+        elif self.detection_alg == 'lstm':
+            # Convert col to PyTorch tensor
+            sequence = torch.tensor(
+                self.data[idx], dtype=torch.float)
+            self.processed_items += 1
+            return sequence
+        else:
+            raise ValueError('Invalid detection algorithm.')
 
     def __len__(self):
         return len(self.data)
