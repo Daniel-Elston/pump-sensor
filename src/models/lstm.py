@@ -1,62 +1,70 @@
 from __future__ import annotations
 
+from pathlib import Path
+
 import torch
 import torch.nn as nn
+
+from utils.file_log import Logger
 
 
 class LSTMAD(nn.Module):
     def __init__(self, config):
-        super(LSTMAD, self).__init__()
         self.config = config
+        self.logger = Logger('MakeDatasetLog', f'{
+                             Path(__file__).stem}.log').get_logger()
+        super(LSTMAD, self).__init__()
         self.lstm = nn.LSTM(
-            input_size=config['n_features'],
+            input_size=1,  # Single feature per time step
             hidden_size=config['hidden_size'],
             num_layers=config['num_layers'],
             batch_first=True
         )
-        # Adjusted to output the hidden_size
         self.linear = nn.Linear(
             in_features=config['hidden_size'],
-            out_features=config['n_features']
+            out_features=1  # Output one value per time step
         )
 
     def forward(self, x):
-        """
-        Forward pass through the model.
-        x: (batch_size, seq_length, n_features)
-        """
+        # print(f"Shape of input to LSTM: {x.shape}")
         lstm_out, _ = self.lstm(x)
-        # The last output of the sequence is considered
-        return self.linear(lstm_out[:, -1, :])
+        # print(f'Shape of lstm_out:{lstm_out.shape}')
+        output = self.linear(lstm_out)
+        return output
 
     def train_model(self, train_dataloader):
+        """
+        Train the model.
+        Args:
+            train_dataloader (DataLoader): Dataloader for the training set.
+        """
         criterion = nn.MSELoss()
         optimizer = torch.optim.Adam(
             self.parameters(), lr=self.config['learning_rate'])
-
-        for epoch in range(self.config['epochs']):
+        print('Training model...')
+        for epoch in range(self.config['n_epochs']):
             total_loss = 0
-            for seqs, _ in train_dataloader:
+            for seqs in train_dataloader:
                 optimizer.zero_grad()
                 output = self(seqs)
-                # Comparing with the last item in sequence
-                loss = criterion(output, seqs[:, -1, :])
+                # Target is the input sequence itself
+                loss = criterion(output, seqs)
                 loss.backward()
                 optimizer.step()
                 total_loss += loss.item()
             avg_loss = total_loss / len(train_dataloader)
             print(
-                f'Epoch {epoch+1}/{self.config["epochs"]} Loss: {avg_loss:.8f}')
+                f'Epoch {epoch+1}/{self.config['n_epochs']} Loss: {avg_loss:.8f}')
+        print('Finished training.')
 
-        # Save the model after training
-        torch.save(self.state_dict(), self.config['model_path'])
-
-    def detect_anomalies(self, test_dataloader, threshold=0.1):
+    def detect_anomalies(self, test_dataloader):
+        threshold = self.config['threshold']
         self.eval()
         anomalies = []
         with torch.no_grad():
-            for seqs, _ in test_dataloader:
+            for seqs in test_dataloader:
                 output = self(seqs)
-                loss = torch.mean(torch.abs(output - seqs[:, -1, :]), dim=1)
-                anomalies.extend(loss > threshold)
+                loss = torch.mean(torch.abs(output - seqs), dim=1)
+                batch_anomalies = (loss > threshold).int().view(-1).tolist()
+                anomalies.extend(batch_anomalies)
         return anomalies

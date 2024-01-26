@@ -27,7 +27,7 @@ class BaseDataProcessing:
         self.df = None
 
         self.method = method
-        self.time_window = time_window
+        self.time_window = config['time_window']
         self.scaler = StandardScaler() if method == 'standardize' else MinMaxScaler()
 
     def load_data(self):
@@ -119,6 +119,7 @@ class BaseDataProcessing:
         self.convert_data_types()
         # self.sort_by_timestamp()
         self.scale_data()
+        print(self.df.shape)
 
         self.logger.info('Base Processing completed')
         self.logger.info(f"Final dataset shape: {self.df.shape}")

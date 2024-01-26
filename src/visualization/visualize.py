@@ -24,6 +24,8 @@ class Visualiser:
             matplotlib.figure.Figure: The figure object with the plot.
         """
         get_anomaly = df[df['anomaly'] == -1]
+        # get_anomaly = df[df['anomaly'] == 1]
+
         fig, ax = plt.subplots(figsize=(18, 8))
         plt.plot(
             df[[f'sensor_{self.sensor_n}']],
@@ -36,7 +38,7 @@ class Visualiser:
             get_anomaly[[f'sensor_{self.sensor_n}']],
             color='red',
             label='anomaly',
-            s=10
+            s=5
         )
 
     def apply_level_shifts(self, alarms, shift_type):

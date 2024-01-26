@@ -6,11 +6,11 @@ detection_alg: 'iso' # lstm/iso
 # Paths
 data_path: 'data/sdo/sensor.parq'
 results_path: 'results/iso1.json'
-model_path: 'models/iso1.pth'
+model_path: 'models/lstm1.pth'
 
 # Log Parameters
 logging:
-  level: DEBUG                         # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  level: INFO                         # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 # Data Parameters
 cols_to_drop:
@@ -30,15 +30,12 @@ sensors_to_use:
   - sensor_48
 
 # Dataset Creation Parameters
-sensor_n: 5                           # 1,2(E),3,4(H),5,6
-time_window: '5H'
-batch_size: 1
-overlap: 0
-seq_length: 10
+sensor_n: 5                          # 1,2(E),3,4(H),5,6
+time_window: '2H'
 
 # Isolation Forest Parameters
 shift_alg: 'adtk'                     # ruptures/adtk
-contamination: 0.025
+contamination: 0.1    # 0.025
 n_bkps: 12
 c: 4.0
 window: 24
@@ -46,6 +43,12 @@ window: 24
 # LSTM Parameters
 n_features: 1
 hidden_size: 64
-num_layers: 2
+num_layers: 3
 learning_rate: 0.001
 n_epochs: 10
+
+batch_size: 640
+overlap: 250
+# threshold: 0.025
+seq_length: 1000
+threshold: 0.03
