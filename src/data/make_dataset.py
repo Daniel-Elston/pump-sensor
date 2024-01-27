@@ -44,15 +44,12 @@ class SensorDataset(Dataset, BaseDataProcessing):
     def prepare_lstm_data(self):
         self.logger.info("Preparing data for LSTM...")
         seq_length = self.config['seq_length']
-        # change to seq_length - 1 = max overlap
-        # overlap = self.config['overlap']
         data_array = self.data.values
         segments = []
 
         for start_pos in range(0, len(data_array) - seq_length + 1):
             end_pos = start_pos + seq_length
             segment = data_array[start_pos:end_pos, self.config['sensor_n']]
-            # Reshape to [seq_length, 1]
             segments.append(segment.reshape(-1, 1))
 
         self.logger.info("Converted LSTM data to segmented NumPy array.")
@@ -62,16 +59,14 @@ class SensorDataset(Dataset, BaseDataProcessing):
         if self.detection_alg == 'iso':
             sensor_data = torch.tensor(
                 self.data.iloc[idx].values, dtype=torch.float)
-            return sensor_data
         elif self.detection_alg == 'lstm':
             segment = self.segments[idx]
             sequence = torch.tensor(segment, dtype=torch.float)
-            return sequence
         else:
             raise ValueError('Invalid detection algorithm.')
 
         self.processed_items += 1
-        # return sensor_data if self.detection_alg == 'iso' else sequence
+        return sensor_data if self.detection_alg == 'iso' else sequence
 
     def __len__(self):
         if self.detection_alg == 'iso':

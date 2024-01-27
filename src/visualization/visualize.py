@@ -24,7 +24,7 @@ class Visualiser:
             matplotlib.figure.Figure: The figure object with the plot.
         """
         get_anomaly = df[df['anomaly'] == -1]
-        # get_anomaly = df[df['anomaly'] == 1]
+        # get_anomaly = df[df['anomaly'] == 1] change for lstm
 
         fig, ax = plt.subplots(figsize=(18, 8))
         plt.plot(
@@ -68,7 +68,7 @@ class Visualiser:
             for i in range(len(alarms)):
                 plt.axvline(
                     x=alarms.index[i],
-                    color='green',
+                    color='r',
                     linewidth=1,
                     alpha=0.1
                 )
