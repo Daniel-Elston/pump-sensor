@@ -1,8 +1,10 @@
 name: pump-sensor
 channels:
+  - pytorch-nightly
   - conda-forge
   - defaults
 dependencies:
+  - adtk=0.6.2=py312hfc267ef_1
   - aiobotocore=2.8.0=pyhd8ed1ab_0
   - aiohttp=3.9.1=py312he70551f_0
   - aiohttp-retry=2.8.3=pyhd8ed1ab_0
@@ -21,10 +23,25 @@ dependencies:
   - asyncssh=2.14.1=pyhd8ed1ab_0
   - atpublic=3.0.1=pyhd8ed1ab_0
   - attrs=23.1.0=pyh71513ae_1
+  - aws-c-auth=0.7.8=hfc12bfc_2
+  - aws-c-cal=0.6.9=h7f0e5be_2
+  - aws-c-common=0.9.10=hcfcfb64_0
+  - aws-c-compression=0.2.17=h7f0e5be_7
+  - aws-c-event-stream=0.3.2=h51e6447_8
+  - aws-c-http=0.7.14=h80119a0_3
+  - aws-c-io=0.13.36=ha737126_2
+  - aws-c-mqtt=0.9.10=hd6138de_2
+  - aws-c-s3=0.4.4=h885c6ba_0
+  - aws-c-sdkutils=0.1.13=h7f0e5be_0
+  - aws-checksums=0.1.17=h7f0e5be_6
+  - aws-crt-cpp=0.24.11=h196e575_2
+  - aws-sdk-cpp=1.11.210=h5f33293_4
   - babel=2.14.0=pyhd8ed1ab_0
   - backports.zoneinfo=0.2.1=py312h2e8e312_8
   - beautifulsoup4=4.12.2=pyha770c72_0
   - billiard=4.1.0=py312he70551f_1
+  - blas=2.120=mkl
+  - blas-devel=3.9.0=20_win64_mkl
   - bleach=6.1.0=pyhd8ed1ab_0
   - boto3=1.33.1=pyhd8ed1ab_0
   - botocore=1.33.1=pyhd8ed1ab_0
@@ -32,6 +49,7 @@ dependencies:
   - brotli-bin=1.1.0=hcfcfb64_1
   - brotli-python=1.1.0=py312h53d5487_1
   - bzip2=1.0.8=hcfcfb64_5
+  - c-ares=1.23.0=hcfcfb64_0
   - ca-certificates=2023.11.17=h56e8100_0
   - cached-property=1.5.2=hd8ed1ab_1
   - cached_property=1.5.2=pyha770c72_1
@@ -143,6 +161,14 @@ dependencies:
   - krb5=1.21.2=heb0366b_0
   - lcms2=2.16=h67d730c_0
   - lerc=4.0.0=h63175ca_0
+  - libabseil=20230802.1=cxx17_h63175ca_0
+  - libarrow=14.0.1=h8ab2780_9_cpu
+  - libarrow-acero=14.0.1=h63175ca_9_cpu
+  - libarrow-dataset=14.0.1=h63175ca_9_cpu
+  - libarrow-flight=14.0.1=h53b1db0_9_cpu
+  - libarrow-flight-sql=14.0.1=h78eab7c_9_cpu
+  - libarrow-gandiva=14.0.1=hb2eaab1_9_cpu
+  - libarrow-substrait=14.0.1=hd4c9904_9_cpu
   - libblas=3.9.0=20_win64_mkl
   - libbrotlicommon=1.1.0=hcfcfb64_1
   - libbrotlidec=1.1.0=hcfcfb64_1
@@ -150,28 +176,41 @@ dependencies:
   - libcblas=3.9.0=20_win64_mkl
   - libclang=15.0.7=default_h77d9078_3
   - libclang13=15.0.7=default_h77d9078_3
+  - libcrc32c=1.1.2=h0e60522_0
+  - libcurl=8.5.0=hd5e4a3a_0
   - libdeflate=1.19=hcfcfb64_0
+  - libevent=2.1.12=h3671451_1
   - libexpat=2.5.0=h63175ca_1
   - libffi=3.4.2=h8ffe710_5
   - libgd=2.3.3=h312136b_9
   - libgit2=1.7.1=hc6d37dd_1
   - libglib=2.78.3=h16e383f_0
+  - libgoogle-cloud=2.12.0=h39f2fc6_4
+  - libgrpc=1.59.3=h5bbd4a7_0
   - libhwloc=2.9.3=default_haede6df_1009
   - libiconv=1.17=h8ffe710_0
   - libjpeg-turbo=3.0.0=hcfcfb64_1
   - liblapack=3.9.0=20_win64_mkl
+  - liblapacke=3.9.0=20_win64_mkl
   - libogg=1.3.4=h8ffe710_1
+  - libparquet=14.0.1=h7ec3a38_9_cpu
   - libpng=1.6.39=h19919ed_0
+  - libprotobuf=4.24.4=hb8276f3_0
+  - libre2-11=2023.06.02=h8c5ae5e_0
   - libsodium=1.0.18=h8d14728_1
   - libsqlite=3.44.2=hcfcfb64_0
   - libssh2=1.11.0=h7dfc565_0
+  - libthrift=0.19.0=ha2b3283_1
   - libtiff=4.6.0=h6e2ebb7_2
+  - libutf8proc=2.8.0=h82a8f57_0
+  - libuv=1.44.2=hcfcfb64_1
   - libvorbis=1.3.7=h0e60522_0
   - libwebp=1.3.2=hcfcfb64_1
   - libwebp-base=1.3.2=hcfcfb64_0
   - libxcb=1.15=hcd874cb_0
   - libxml2=2.11.6=hc3477c8_0
   - libzlib=1.2.13=hcfcfb64_5
+  - lz4-c=1.9.4=hcfcfb64_0
   - m2w64-gcc-libgfortran=5.3.0=6
   - m2w64-gcc-libs=5.3.0=7
   - m2w64-gcc-libs-core=5.3.0=7
@@ -185,6 +224,9 @@ dependencies:
   - mdurl=0.1.0=pyhd8ed1ab_0
   - mistune=3.0.2=pyhd8ed1ab_0
   - mkl=2023.2.0=h6a75c08_50497
+  - mkl-devel=2023.2.0=h57928b3_50497
+  - mkl-include=2023.2.0=h6a75c08_50497
+  - mpmath=1.3.0=pyhd8ed1ab_0
   - msys2-conda-epoch=20160418=1
   - multidict=6.0.4=py312he70551f_1
   - munkres=1.1.4=pyh9f0ad1d_0
@@ -203,6 +245,7 @@ dependencies:
   - omegaconf=2.3.0=pyhd8ed1ab_0
   - openjpeg=2.5.0=h3d672ee_3
   - openssl=3.2.0=hcfcfb64_1
+  - orc=1.9.2=hf0b6bd4_0
   - orjson=3.9.10=py312hb26873d_0
   - overrides=7.4.0=pyhd8ed1ab_0
   - packaging=23.2=pyhd8ed1ab_0
@@ -230,6 +273,7 @@ dependencies:
   - pthread-stubs=0.4=hcd874cb_1001
   - pthreads-win32=2.9.1=hfa6e2cd_3
   - pure_eval=0.2.2=pyhd8ed1ab_0
+  - pyarrow=14.0.1=py312h85e32bb_9_cpu
   - pycparser=2.21=pyhd8ed1ab_0
   - pydantic=2.5.2=pyhd8ed1ab_0
   - pydantic-core=2.14.5=py312hfccd98a_0
@@ -250,6 +294,8 @@ dependencies:
   - python-json-logger=2.0.7=pyhd8ed1ab_0
   - python-tzdata=2023.3=pyhd8ed1ab_0
   - python_abi=3.12=4_cp312
+  - pytorch=2.2.0.dev20231213=py3.12_cpu_0
+  - pytorch-mutex=1.0=cpu
   - pytz=2023.3.post1=pyhd8ed1ab_0
   - pywin32=306=py312h53d5487_2
   - pywin32-on-windows=0.1.0=pyh07e9846_2
@@ -259,6 +305,7 @@ dependencies:
   - qt-main=5.15.8=h9e85ed6_18
   - qtconsole-base=5.5.1=pyha770c72_0
   - qtpy=2.4.1=pyhd8ed1ab_0
+  - re2=2023.06.02=hcbb65ff_0
   - referencing=0.32.0=pyhd8ed1ab_0
   - requests=2.31.0=pyhd8ed1ab_0
   - rfc3339-validator=0.1.4=pyhd8ed1ab_0
@@ -267,6 +314,7 @@ dependencies:
   - rpds-py=0.13.2=py312hfccd98a_0
   - ruamel.yaml=0.18.5=py312he70551f_0
   - ruamel.yaml.clib=0.2.7=py312he70551f_2
+  - ruptures=1.1.9=py312ha90f08f_0
   - s3fs=2023.12.1=pyhd8ed1ab_0
   - s3transfer=0.8.0=pyhd8ed1ab_0
   - scikit-learn=1.3.2=py312hcacafb1_2
@@ -283,11 +331,13 @@ dependencies:
   - sip=6.7.12=py312h53d5487_0
   - six=1.16.0=pyh6c4a22f_0
   - smmap=5.0.0=pyhd8ed1ab_0
+  - snappy=1.1.10=hfb803bf_0
   - sniffio=1.3.0=pyhd8ed1ab_0
   - soupsieve=2.5=pyhd8ed1ab_1
   - sqltrie=0.10.0=pyhd8ed1ab_0
   - stack_data=0.6.2=pyhd8ed1ab_0
   - statsmodels=0.14.0=py312ha90f08f_3
+  - sympy=1.12=pyh04b8f61_3
   - tabulate=0.9.0=pyhd8ed1ab_1
   - tbb=2021.11.0=h91493d7_0
   - terminado=0.18.0=pyh5737063_0
@@ -344,4 +394,3 @@ dependencies:
   - zipp=3.17.0=pyhd8ed1ab_0
   - zlib=1.2.13=hcfcfb64_5
   - zstd=1.5.5=h12be248_0
-prefix: C:\Users\delst\Miniconda3\envs\pump-sensor
