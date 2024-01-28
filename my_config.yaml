@@ -6,7 +6,6 @@ detection_alg: 'iso' # lstm/iso
 # Paths
 data_path: 'data/sdo/sensor.parq'
 results_path: 'results/iso1.json'
-model_path: 'models/lstm1.pth'
 
 # Log Parameters
 logging:
@@ -39,16 +38,4 @@ contamination: 0.1    # 0.025
 n_bkps: 12
 c: 4.0
 window: 24
-
-# LSTM Parameters
-n_features: 1
-hidden_size: 64
-num_layers: 3
-learning_rate: 0.001
-n_epochs: 10
-
-batch_size: 640
-overlap: 250
-# threshold: 0.025
-seq_length: 1000
-threshold: 0.03
+batch_size: 1
