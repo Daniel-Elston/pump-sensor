@@ -5,15 +5,11 @@ import warnings
 from pathlib import Path
 
 import matplotlib.pyplot as plt
-import numpy as np
 import pandas as pd
-from torch.utils.data import DataLoader
-from torch.utils.data import random_split
 
 from src.data.make_dataset import SensorDataset
 from src.models.iso_forest import IsolationForestAD
 from src.models.level_shift import LevelShiftDetector
-from src.models.lstm import LSTMAD
 from src.visualization.visualize import Visualiser
 from utils.file_log import Logger
 from utils.file_save import FileSaver
@@ -35,20 +31,9 @@ class DataPipeline:
     def form_initial_dataset(self):
         try:
             dataset = SensorDataset(self.data_path, self.config)
-
             if self.detection_alg == 'iso':
                 prepared_data = dataset.prepare_iso_data()
                 return dataset, prepared_data
-
-            elif self.detection_alg == 'lstm':
-                prepared_data = dataset.prepare_lstm_data()
-                len_data = len(prepared_data)
-                train_size = int(0.7 * len_data)
-                test_size = len_data - train_size
-                train_data, test_data = random_split(
-                    dataset, [train_size, test_size])
-                return dataset, prepared_data, train_data, test_data
-
             else:
                 raise ValueError('Invalid detection algorithm.')
         except Exception as e:
@@ -77,35 +62,6 @@ class DataPipeline:
                     f'sensor_{sensor_n}': prepared_data[:, sensor_n-1],
                     'anomaly': anomalies[f'sensor_{sensor_n}'],
                     'score': scores[f'sensor_{sensor_n}']
-                }
-            )
-            df.set_index('timestamp', inplace=True)
-            return df
-        except Exception as e:
-            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
-
-    def create_lstm_df(self, dataset, prepared_data, anomalies):
-        """
-        Create a dataframe from the prepared data.
-        Args:
-            dataset (SensorDataset): Dataset object.
-            prepared_data (pd.DataFrame): Prepared data.
-            anomalies (pd.DataFrame): Anomalies detected.
-            scores (pd.DataFrame): Scores for each data point.
-        Returns:
-            df (pd.DataFrame): Dataframe containing the prepared data.
-        """
-        truncated_timestamps = dataset.data.timestamp.values[:len(
-            prepared_data)]
-        truncated_data = dataset.data.values[:len(prepared_data)]
-
-        try:
-            df = pd.DataFrame(
-                {
-                    'timestamp': pd.to_datetime((truncated_timestamps), unit='s'),
-                    'unix': truncated_timestamps,
-                    f'sensor_{self.config['sensor_n']}': truncated_data[:, self.config['sensor_n']],
-                    'anomaly': anomalies
                 }
             )
             df.set_index('timestamp', inplace=True)
@@ -170,44 +126,8 @@ class DataPipeline:
             self.logger.error(f'Error in pipeline: {e}', exc_info=True)
         self.logger.info("Pipeline completed successfully")
 
-    def run_lstm(self):
-        self.logger.info(
-            '====================================================')
-        self.logger.info('Beginning LSTM pipeline')
-        try:
-            dataset, prepared_data, train_data, test_data = self.form_initial_dataset()
-            dataset.log_summary()
-
-            train_dataloader = DataLoader(
-                train_data, self.config['batch_size'])
-            test_dataloader = DataLoader(test_data, self.config['batch_size'])
-
-            model = LSTMAD(self.config)
-            model.train_model(train_dataloader)
-
-            train_anomalies = model.detect_anomalies(train_dataloader)
-            test_anomalies = model.detect_anomalies(test_dataloader)
-            anomalies = np.concatenate(
-                [train_anomalies, test_anomalies], axis=0).tolist()
-
-            df = self.create_lstm_df(dataset, prepared_data, anomalies)
-            self.generate_visualise(df, anomalies)
-            self.fs.save_file(anomalies, self.results_path)
-            self.logger.info(
-                f'Anomaly detection results saved to {self.results_path}')
-
-        except Exception as e:
-            self.logger.error(f'Error in pipeline: {e}', exc_info=True)
-        self.logger.info("Pipeline completed successfully")
-
 
 if __name__ == "__main__":
     project_dir, config = setup_project_env()
     pipeline = DataPipeline(project_dir, config)
-
-    if config['detection_alg'] == 'iso':
-        pipeline.run_iso()
-    elif config['detection_alg'] == 'lstm':
-        pipeline.run_lstm()
-    else:
-        raise ValueError('Invalid detection algorithm.')
+    pipeline.run_iso()

@@ -3,7 +3,6 @@ from __future__ import annotations
 
 from pathlib import Path
 
-import numpy as np
 import torch
 from torch.utils.data import DataLoader
 from torch.utils.data import Dataset
@@ -14,16 +13,15 @@ from utils.file_log import Logger
 
 class SensorDataset(Dataset, BaseDataProcessing):
     def __init__(self, data_path, config, method='normalize'):
+        self.config = config
         self.logger = Logger('MakeDatasetLog', f'{
                              Path(__file__).stem}.log').get_logger()
         self.logger.info("Initializing SensorDataset...")
         BaseDataProcessing.__init__(
             self, data_path, config, method=method, time_window=config['time_window'])
-        self.config = config
         self.detection_alg = config['detection_alg']
         self.processed_items = 0
         self.data = self.process()
-        self.segments = self.prepare_lstm_data()
         self.logger.info(f"Dataset loaded as DataFrame with shape: {
                          self.data.shape}")
 
@@ -41,38 +39,19 @@ class SensorDataset(Dataset, BaseDataProcessing):
         self.logger.info("Converted Isolation Forest data to NumPy array.")
         return sensor_data_np
 
-    def prepare_lstm_data(self):
-        self.logger.info("Preparing data for LSTM...")
-        seq_length = self.config['seq_length']
-        data_array = self.data.values
-        segments = []
-
-        for start_pos in range(0, len(data_array) - seq_length + 1):
-            end_pos = start_pos + seq_length
-            segment = data_array[start_pos:end_pos, self.config['sensor_n']]
-            segments.append(segment.reshape(-1, 1))
-
-        self.logger.info("Converted LSTM data to segmented NumPy array.")
-        return np.array(segments)
-
     def __getitem__(self, idx):
         if self.detection_alg == 'iso':
             sensor_data = torch.tensor(
                 self.data.iloc[idx].values, dtype=torch.float)
-        elif self.detection_alg == 'lstm':
-            segment = self.segments[idx]
-            sequence = torch.tensor(segment, dtype=torch.float)
         else:
             raise ValueError('Invalid detection algorithm.')
 
         self.processed_items += 1
-        return sensor_data if self.detection_alg == 'iso' else sequence
+        return sensor_data
 
     def __len__(self):
         if self.detection_alg == 'iso':
             return len(self.data)
-        elif self.detection_alg == 'lstm':
-            return len(self.segments)
         else:
             raise ValueError('Invalid detection algorithm.')
 
