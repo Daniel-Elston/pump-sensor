@@ -1,29 +1,27 @@
 from __future__ import annotations
 
 import json
+import logging
 import pickle
-from pathlib import Path
 
 import pyarrow.parquet as pq
 import yaml
 
-from utils.file_log import Logger
 from utils.setup_env import setup_project_env
 # import feather
-project_dir, config = setup_project_env()
+project_dir, config, setup_logs = setup_project_env()
 
 
 class FileSaver:
     def __init__(self):
-        self.logger = Logger(
-            f'{self.__class__.__name__}',
-            f'{Path(__file__).stem}.log').get_logger()
+        self.logger = logging.getLogger(self.__class__.__name__)
 
     def save_file(self, data, file_path):
         """
         Save file to local path
         """
         file_ext = file_path.split('.')[-1]
+        self.logger.info('Saving file: %s', file_path)
 
         try:
             if file_ext in ['xls', 'xlsx', 'xlsm', 'xlsb']:

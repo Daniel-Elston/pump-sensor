@@ -78,7 +78,6 @@ def main(csv_file, index=None):
         print(f"Data at index {index}: {data}")
         print(f"Timestamp: {timestamp}")
     else:
-        # Default behavior: iterate through the DataLoader
         for i, (batch, timestamps) in enumerate(dataloader):
             print(f"Batch {i+1}:")
             print(batch, timestamps)
@@ -87,7 +86,7 @@ def main(csv_file, index=None):
 
 
 if __name__ == "__main__":
-    project_dir = Path(__file__).resolve().parents[2]  # Adjust if necessary
+    project_dir = Path(__file__).resolve().parents[2]
 
     parser = argparse.ArgumentParser(description="View sensor data.")
     parser.add_argument('csv_file', type=str, help='Path to the CSV file')

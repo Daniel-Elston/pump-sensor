@@ -1,15 +1,18 @@
 # my_config.yaml
 
 # Detection Algorithm
-detection_alg: 'iso' # lstm/iso
+scaler: standardize                   # OPTIONS: standard/minmax
+detection_alg: 'iso'                  # OPTIONS: lstm/iso
 
 # Paths
-data_path: 'data/sdo/sensor.parq'
-results_path: 'results/iso1.json'
+raw_data_path: data/raw/sensor.csv
+data_path: data/sdo/sensor.parq
+results_path: results/iso1.json
 
 # Log Parameters
 logging:
-  level: INFO                         # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
+  file_level: DEBUG
+  console_level: DEBUG                      # Options: DEBUG, INFO, WARNING, ERROR, CRITICAL
 
 # Data Parameters
 cols_to_drop:
