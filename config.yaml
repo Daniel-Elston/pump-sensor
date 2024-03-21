@@ -8,6 +8,7 @@ detection_alg: 'iso'                  # OPTIONS: lstm/iso
 raw_data_path: data/raw/sensor.csv
 data_path: data/sdo/sensor.parq
 results_path: results/iso1.json
+results_path_img: results/iso1.png
 
 # Log Parameters
 logging:

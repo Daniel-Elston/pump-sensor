@@ -1,56 +1,44 @@
-CV_Model_Compare
-==============================
-
-A comparison of self made CV classification models and pre-trained models
-
-Project Organization
-------------
-
-    ├── data
-    │   ├── external       <- Data from third party sources.
-    │   ├── interim        <- Intermediate data that has been transformed.
-    │   ├── processed      <- The final, canonical data sets for modeling.
-    │   └── raw            <- The original, immutable data dump. Found: https://www.kaggle.com/datasets/nphantawee/pump-sensor-data/data
-    │
-    ├── docs               <- A default Sphinx project; see sphinx-doc.org for details
-    │
-    ├── models             <- Trained and serialized models, model predictions, or model summaries
-    │
-    ├── notebooks          <- Jupyter notebooks. Naming convention is a number (for ordering),
-    │                         the creator's initials, and a short `-` delimited description, e.g.
-    │                         `1.0-jqp-initial-data-exploration`.
-    │
-    ├── references         <- Data dictionaries, manuals, and all other explanatory materials.
-    │
-    ├── reports            <- Generated analysis as HTML, PDF, LaTeX, etc.
-    │   └── figures        <- Generated graphics and figures to be used in reporting
-    │
-    ├── src                <- Source code for use in this project.
-    │   ├── __init__.py    <- Makes src a Python module
-    │   ├── pipeline.py    <- Central pipeline class integrating directory scripts
-    │   │
-    │   ├── data           <- Scripts to download or generate data
-    │   │   └── make_dataset.py
-    │   │
-    │   ├── features       <- Scripts to turn raw data into features for modeling
-    │   │   └── build_features.py
-    │   │
-    │   ├── models         <- Scripts to train models and then use trained models to make
-    │   │   │                 predictions
-    │   │   ├── predict_model.py
-    │   │   └── train_model.py
-    │   │
-    │   └── visualization  <- Scripts to create exploratory and results oriented visualizations
-    │       └── visualize.py
-    │
-    ├── config.yaml          <- Configuration settings and parameters for the project.
-    ├── README.md          <- The top-level README for developers using this project.
-    ├── requirements.txt   <- The requirements file for reproducing the analysis environment, e.g.
-    │                         generated with `pip freeze > requirements.txt`
-    │
-    └── setup.py           <- makes project pip installable (pip install -e .) so src can be imported
+![result](results/iso1.png)
 
 
---------
+# Pump Sensor Anomaly Detection
 
-<p><small>Project based on the <a target="_blank" href="https://drivendata.github.io/cookiecutter-data-science/">cookiecutter data science project template</a>. #cookiecutterdatascience</small></p>
+This project aims to detect anomalies in pump sensor data to prevent potential failures and maintain operational efficiency. By leveraging machine learning algorithms, the project identifies unusual patterns that indicate a deviation from the normal operational parameters.
+
+#### -- Project Status: [Complete]
+
+---
+
+## Project Objective
+
+The primary goal is to apply anomaly detection techniques to pump sensor data to identify potential issues before they lead to significant problems. Using a combination of isolation forests and level shift detection algorithms, the project offers a way to monitor pump performance and detect early signs of malfunction.
+
+## Raw Data
+
+The dataset used in this project comprises sensor readings from various pumps, including metrics like temperature, pressure, vibration, and flow rates.
+
+**Source:** [Kaggle - Pump Sensor Data](https://www.kaggle.com/datasets/nphantawee/pump-sensor-data)
+
+## Technologies
+
+* Python
+* PyTorch
+* Pandas
+* Numpy
+* scikit-learn
+* ruptures
+* ADTK
+
+## Methodologies
+
+- **Data Preprocessing:** Cleaning and preparing the sensor data for analysis.
+- **Anomaly Detection:** Implementing the Isolation Forest algorithm from scikit-learn and level shift detection using the `ruptures` and `ADTK` libraries. This approach allows for the early identification of potential anomalies in the sensor data.
+- **Evaluation:** Assessing the effectiveness of the chosen algorithms in detecting anomalies and comparing their performance.
+
+---
+
+## Contacts
+
+For any inquiries or further discussion regarding this project, feel free to reach out.
+
+Email: delstonds@outlook.com

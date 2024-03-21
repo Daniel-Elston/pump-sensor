@@ -20,9 +20,8 @@ warnings.filterwarnings(action='ignore', category=FutureWarning)
 
 
 class DataPipeline:
-    def __init__(self, project_dir, config, fs=FileSaver()):
+    def __init__(self, config, fs=FileSaver()):
         self.config = config
-        self.project_dir = project_dir
         self.data_path = Path(config['raw_data_path'])
         self.results_path = config['results_path']
         self.detection_alg = config['detection_alg']
@@ -76,6 +75,7 @@ class DataPipeline:
                     alarms, shift_type=self.config['shift_alg'])
             else:
                 pass
+            plt.savefig(self.config['results_path_img'])
             return plt.show()
         except Exception as e:
             self.log.error(f'Error in pipeline: {e}', exc_info=True)
@@ -117,6 +117,6 @@ class DataPipeline:
 
 if __name__ == "__main__":
     project_dir, config, setup_logs = setup_project_env()
-    pipeline = DataPipeline(project_dir, config)
+    pipeline = DataPipeline(config)
     pipeline.main()
     # pipeline.test()
